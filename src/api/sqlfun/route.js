@@ -1,5 +1,7 @@
 
 const express = require('express');
+
+const { validateAuth } = require("./../../../auth");
 const {
   sqlcall
 } = require('./index');
@@ -7,7 +9,7 @@ const {
 
 module.exports = () => {
   const routes = express.Router();
-  routes.get('/sql', (req, res) => {
+  routes.get('/sql',validateAuth, (req, res) => {
     return sqlcall(req, res);
   });
 //   routes.get('/apiSet', (req, res) => {

@@ -16,7 +16,7 @@ module.exports = {
   sqlcall: async (req, res) => {
     var rows;
     let passivepriority = 5;
-    let activepriority = 4;
+    let activepriority = 3;
     const opt = {
       database: 'MySQL' // MySQL is the default database
     }

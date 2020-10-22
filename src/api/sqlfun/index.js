@@ -14,18 +14,19 @@ const query = util.promisify(conn.query).bind(conn);
   module.exports = {
     sqlcall: async (req, res) => {
         var rows;
-        let passivepriority=3;
+        let passivepriority=5;
+        let activepriority=3;
         const opt = {
           database: 'MySQL' // MySQL is the default database
         }
         var bodyjson=req.body;
-        console.log(bodyjson.users.mobile.active);
+        // console.log(bodyjson.users.mobile.active);
         // console.log(req.body);
           console.log("                   ");
-        // const parser = new Parser();
+
       //  SELECT Teachers.id as teacher_id, Students.id as student_id FROM Teachers FULL OUTER JOIN Students ON Teachers.id = Students.teacher_id;
         const ast = parser.astify('SELECT Teachers.id as teacher_id, Students.id as student_id FROM Teachers FULL OUTER JOIN Students ON Teachers.id = Students.teacher_id;',opt); // mysql sql grammer parsed by default
-        // const sql = parser.sqlify(ast, opt);
+
           //       try {
           //    rows= await query(sql);
           //   console.log(rows);
@@ -43,10 +44,45 @@ const query = util.promisify(conn.query).bind(conn);
             }
           });
         // console.log(joinarr);
+
         joinarr.forEach(element =>{
-          console.log(element.table);
+          // console.log(element.table);
+          let table=element.table;
+          let column=element.column;
+          let temp1=bodyjson[table];
+          let temp2=temp1[column];
+          console.log(Number(passivepriority));
+
+          if((temp2.passive) >= (passivepriority)){
+            return res.status(400).send("JOIN NOT ALLOWED");
+          }
+          // console.log(temp2);
+          // console.log(bodyjson);
         });
-        // console.log(ast);
-        return res.status(200).send(ast);
+        let finalcol=[];
+        const selectquery= ast[0].columns;
+        // console.log(selectquery);
+        selectquery.forEach(element =>{
+          // console.log(element);
+          let table=element.expr.table;
+          let column=element.expr.column;
+          let temp1=bodyjson[table];
+          let temp2=temp1[column];
+          // console.log(temp2);
+          if((temp2.active) <= (activepriority)){
+            finalcol.push(element);
+            // return res.status(400).send("dont include this");
+          }
+        });
+        console.log(finalcol);
+        console.log("             ");
+        console.log(ast);
+        ast[0].columns=finalcol;
+        console.log("             ");
+        console.log(ast);
+
+        const sql = parser.sqlify(ast, opt);
+        return res.status(200).send(sql);
+
     }
 }
